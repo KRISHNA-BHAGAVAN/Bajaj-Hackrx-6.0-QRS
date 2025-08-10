@@ -152,3 +152,11 @@ workflow.add_edge("generate_all_answers", END)
 
 # Compiled graph, ready for use
 jarvis = workflow.compile()
+# Generate the PNG bytes
+png_data = jarvis.get_graph().draw_mermaid_png()
+
+# Save PNG to file
+with open("workflow.png", "wb") as f:
+    f.write(png_data)
+
+print("Workflow image saved as langgraph_workflow.png")
