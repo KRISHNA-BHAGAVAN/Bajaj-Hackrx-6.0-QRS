@@ -36,30 +36,8 @@ Built with **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (R
 Entity is implemented as a **stateful LangGraph workflow**—each node represents a specific processing stage, with a conditional router deciding the path based on document type and query intent.
 
 ```
-graph TD
-    A[API Request: URL + Questions] --> B{FastAPI Server}
-    B --> C[LangGraph: Initialize State]
-    C --> D{Cache Check: FAISS Index Exists?}
-    D -- Yes --> F[Load Index from Cache]
-    D -- No --> E[Process Document]
-    E --> E1[Parse File: PDF, PPTX, OCR]
-    E1 --> E2[Chunk Text]
-    E2 --> E3[Embed Chunks]
-    E3 --> E4[Create & Cache FAISS Index]
-    E4 --> F
-    F --> G[Load Retriever]
-    G --> H{Router: API/URL Found?}
-    H -- No --> I[Standard RAG Pipeline]
-    I --> I1[Retrieve Relevant Chunks]
-    I1 --> I2[Generate Answer]
-    I2 --> Z[Final Answer]
-    H -- Yes --> J[ReAct Agent Pipeline]
-    J --> J1[Execute Tools]
-    J1 --> J2[Scrape Web / Call API]
-    J2 --> J3[Reasoning Loop]
-    J3 --> J1
-    J3 --> Z
-    Z --> B
+![Entity Architecture](workflow.png)
+
 ```
 
 ---
