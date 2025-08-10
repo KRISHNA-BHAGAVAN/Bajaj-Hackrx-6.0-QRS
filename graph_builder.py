@@ -47,6 +47,22 @@ def initialize_processing(state: AgentState) -> AgentState:
         "web_content": ""
     }
 
+# +++ NEW NODE +++
+def validate_url(state: AgentState) -> AgentState:
+    """
+    Node to validate the document URL for supported file types.
+    If the file type is unsupported, it sets the final answer and prepares to end the graph.
+    """
+    doc_url = state['doc_url']
+    url_path = doc_url.split('?')[0]
+    ext = os.path.splitext(url_path)[1].lower()
+    if ext in ['.zip', '.bin']:
+        num_questions = len(state.get('questions', [1]))
+        answer = f"Unsupported document type: '{ext}'. This service does not process ZIP or BIN files."
+        print(f"🚫 Unsupported file type detected: {ext}")
+        return {"answers": [answer] * num_questions}
+    return {}
+
 async def perform_reasoning(state: AgentState) -> AgentState:
     """Node that executes the ReAct reasoning agent."""
     return {"answers": await reasoning_agent(state["doc_url"], state["questions"])}
@@ -55,6 +71,15 @@ def check_for_api_context(state: AgentState) -> AgentState:
     """Node that checks the initial document for API-related keywords."""
     docs = state["retriever"].invoke("Api endpoints and urls. search for http")
     return {"initial_context": "\n\n".join(d.page_content for d in docs)}
+
+# +++ NEW ROUTING FUNCTION +++
+def route_after_validation(state: AgentState) -> Literal["continue_processing", "end_processing"]:
+    """Conditional edge to terminate or continue after URL validation."""
+    if "answers" in state and state["answers"]:
+        # An answer has been set by the validation node, so we end.
+        return "end_processing"
+    # The URL is valid, continue the normal workflow.
+    return "continue_processing"
 
 def route_after_context_check(state: AgentState) -> Literal["perform_reasoning", "generate_answers"]:
     """Conditional edge to decide between the ReAct agent and standard RAG."""
@@ -75,9 +100,10 @@ def load_from_cache(state: AgentState) -> AgentState:
 def process_document(state: AgentState) -> AgentState:
     """Node to process, chunk, and embed a document into a FAISS index."""
     docs = get_docs_from_url(state['doc_url'])
+    # The check in get_docs_from_url for zip/bin already returns [], so this handles other failures.
     if not docs:
-        return {"error_message": "Failed to download/parse document."}
-    
+        return {"error_message": "Failed to download or parse the document. The URL may be invalid or the content unreadable."}
+
     chunks = asyncio.run(get_chunks(docs, state['doc_url']))
     if not chunks:
         return {"error_message": "Document chunks are empty."}
@@ -100,8 +126,10 @@ def process_document(state: AgentState) -> AgentState:
 
 async def generate_answers(state: AgentState) -> AgentState:
     """Node to generate answers for all questions in parallel."""
-    if state.get('error_message'):
-        return {"answers": ["Could not generate answers due to an earlier error."]}
+    # Propagate a more specific error message if one was set during processing
+    if error_msg := state.get('error_message'):
+        num_questions = len(state.get('questions', [1]))
+        return {"answers": [error_msg] * num_questions}
 
     sem = asyncio.Semaphore(QA_CONCURRENCY)
 
@@ -112,7 +140,7 @@ async def generate_answers(state: AgentState) -> AgentState:
         return idx, "\n\n".join(d.page_content for d in docs)
 
     contexts = sorted(await asyncio.gather(*[_fetch_context(i, q) for i, q in enumerate(state['questions'])]), key=lambda x: x[0])
-    
+
     async def _answer_one(idx: int, q: str, ctx: str):
         async with sem:
             inputs = {"context": ctx, "question": q}
@@ -120,14 +148,17 @@ async def generate_answers(state: AgentState) -> AgentState:
             final = "".join(parts).strip() or "⚠️ Empty answer from LLM."
             print(f"🧠 Answered question {idx+1}")
             return idx, final
-    
+
     results = sorted(await asyncio.gather(*[_answer_one(i, q, c[1]) for i, (q, c) in enumerate(zip(state['questions'], contexts))]), key=lambda x: x[0])
     return {"answers": [r[1] for r in results], "initial_context": None}
 
 
 # --- Graph Construction ---
 workflow = StateGraph(AgentState)
+
+# +++ UPDATED GRAPH STRUCTURE +++
 workflow.add_node("initialize", initialize_processing)
+workflow.add_node("validate_url", validate_url) # New validation node
 workflow.add_node("check_cache_node", lambda state: {})
 workflow.add_node("load_from_cache", load_from_cache)
 workflow.add_node("check_for_api_context", check_for_api_context)
@@ -136,7 +167,21 @@ workflow.add_node("process_document_flow", process_document)
 workflow.add_node("generate_answers", generate_answers)
 
 workflow.set_entry_point("initialize")
-workflow.add_edge("initialize", "check_cache_node")
+
+# Initial edge now points to the new validation node
+workflow.add_edge("initialize", "validate_url")
+
+# New conditional edge to either stop or continue
+workflow.add_conditional_edges(
+    "validate_url",
+    route_after_validation,
+    {
+        "continue_processing": "check_cache_node",
+        "end_processing": END,
+    }
+)
+
+# The rest of the graph structure remains the same
 workflow.add_edge("load_from_cache", "check_for_api_context")
 workflow.add_edge("process_document_flow", "check_for_api_context")
 workflow.add_conditional_edges("check_for_api_context", route_after_context_check, {
@@ -152,13 +197,3 @@ workflow.add_edge("generate_answers", END)
 
 # Compiled graph, ready for use
 jarvis = workflow.compile()
-
-
-
-# png_data = jarvis.get_graph().draw_mermaid_png()
-
-# # Save PNG to file
-# with open("workflow.png", "wb") as f:
-#     f.write(png_data)
-
-# print("Workflow image saved as langgraph_workflow.png")

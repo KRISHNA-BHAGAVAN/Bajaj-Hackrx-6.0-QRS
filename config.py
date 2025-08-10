@@ -23,7 +23,7 @@ GEMINI_API_KEYS = [os.getenv(f"GEMINI_API_KEY_{i}") for i in range(1, 7) if os.g
 EMBED_BATCH_SIZE = int(os.getenv("EMBED_BATCH_SIZE", "100"))
 LLM_STREAMING_ENABLED = os.getenv("LLM_STREAMING_ENABLED", "true").lower() in ("true", "1", "yes")
 EMBED_CONCURRENCY = int(os.getenv("EMBED_CONCURRENCY", "4"))
-QA_CONCURRENCY = int(os.getenv("QA_CONCURRENCY", "10"))
+QA_CONCURRENCY = int(os.getenv("QA_CONCURRENCY", "4"))
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "5000"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "200"))
 CACHE_DIR = "./faiss_cache"
@@ -65,7 +65,7 @@ EMBED_BATCH_API_AVAILABLE = hasattr(embeddings, "embed_documents")
 # OpenAI is the default.
 
 # --- Option 1: OpenAI (Default) ---
-RAG_LLM = ChatOpenAI(model_name="gpt-4.1-mini", temperature=0, api_key=OPENAI_API_KEY)
+RAG_LLM = ChatOpenAI(model_name="gpt-4.1-nano", temperature=0, api_key=OPENAI_API_KEY)
 
 # --- Option 2: Groq ---
 # To use Groq, comment out the OpenAI model above and uncomment the following lines:
@@ -83,7 +83,7 @@ RAG_LLM = ChatOpenAI(model_name="gpt-4.1-mini", temperature=0, api_key=OPENAI_AP
 #      RAG_LLM = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GEMINI_API_KEYS[0], temperature=0)
 # else:
 #      # Fallback or error if no Gemini key is found
-#      RAG_LLM = ChatOpenAI(model_name="gpt-4.1-mini", temperature=0, api_key=OPENAI_API_KEY)
+#      RAG_LLM = ChatOpenAI(model_name="gpt-4.1-nano", temperature=0, api_key=OPENAI_API_KEY)
 
 
 # =================================================================================
@@ -93,7 +93,7 @@ RAG_LLM = ChatOpenAI(model_name="gpt-4.1-mini", temperature=0, api_key=OPENAI_AP
 
 # --- Option 1: OpenAI (Default) ---
 # To use OpenAI, comment out the Groq model above and uncomment the following lines:
-AGENT_LLM = ChatOpenAI(model_name="gpt-4-turbo", temperature=0, api_key=OPENAI_API_KEY, streaming=True)
+AGENT_LLM = ChatOpenAI(model_name="gpt-4.1-nano", temperature=0, api_key=OPENAI_API_KEY, streaming=True)
 
 
 # --- Option 2: Groq ---
@@ -111,7 +111,7 @@ AGENT_LLM = ChatOpenAI(model_name="gpt-4-turbo", temperature=0, api_key=OPENAI_A
 #      AGENT_LLM = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GEMINI_API_KEYS[0], temperature=0)
 # else:
 #      # Fallback or error if no Gemini key is found
-#      AGENT_LLM = ChatOpenAI(model_name="gpt-4.1-mini", temperature=0, api_key=OPENAI_API_KEY)
+#      AGENT_LLM = ChatOpenAI(model_name="gpt-4.1-nano", temperature=0, api_key=OPENAI_API_KEY)
 
 
 # Helper function for the fallback logic in llm_services.py

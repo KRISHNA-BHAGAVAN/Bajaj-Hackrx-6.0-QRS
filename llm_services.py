@@ -43,21 +43,46 @@ async def fallback_llm_chain(inputs: dict) -> str:
 rag_chain = RunnableLambda(fallback_llm_chain).with_config(run_name="rag_chain_with_fallback")
 
 # --- Streaming Wrapper ---
+# In llm_services.py
+
 async def stream_rag_chain(inputs: dict):
     """
-    A wrapper to handle streaming output from the language model.
-    If streaming is enabled and supported, it yields content chunks.
-    Otherwise, it falls back to a single invocation.
+    A wrapper to handle streaming output with a fallback mechanism.
     """
-    try:
-        formatted_messages = prompt.format_messages(**inputs)
+    formatted_messages = await prompt.ainvoke(inputs)
 
-        if LLM_STREAMING_ENABLED and hasattr(RAG_LLM, "astream"):
+    # 1. Try streaming from the primary LLM first
+    try:
+        if LLM_STREAMING_ENABLED:
+            print("Attempting to stream from primary LLM...")
             async for chunk in RAG_LLM.astream(formatted_messages):
-                yield chunk.content if hasattr(chunk, "content") else str(chunk)
+                yield chunk.content
+            return
+        else: # Non-streaming path
+             # This correctly uses your existing fallback chain
+            yield await rag_chain.ainvoke(inputs)
+            return
+
+    except (RateLimitError, APIError) as e:
+        print(f"⚠️ Primary LLM streaming failed ({type(e).__name__}), trying Gemini fallbacks...")
+        if not GEMINI_API_KEYS:
+            yield f"⚠️ Streaming failed: {e}. No fallback keys available."
             return
         
-        # Fallback for non-streaming cases
-        yield await rag_chain.ainvoke(inputs)
+        # 2. If primary fails, iterate through fallback LLMs for streaming
+        keys_shuffled = random.sample(GEMINI_API_KEYS, len(GEMINI_API_KEYS))
+        for key in keys_shuffled:
+            try:
+                print(f"Attempting to stream from fallback Gemini key...")
+                gemini_llm = get_gemini_llm(key)
+                async for chunk in gemini_llm.astream(formatted_messages):
+                    yield chunk.content
+                return # Success, exit the function
+            except Exception as gemini_e:
+                print(f"⚠️ Gemini key failed. Error: {gemini_e}")
+                continue # Try the next key
+
+        yield f"⚠️ Streaming failed: All fallback models also failed."
+
     except Exception as e:
-        yield f"⚠️ Streaming failed: {e}"
+        yield f"⚠️ An unexpected streaming error occurred: {e}"
