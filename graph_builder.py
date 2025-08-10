@@ -56,9 +56,9 @@ def check_for_api_context(state: AgentState) -> AgentState:
     docs = state["retriever"].invoke("Api endpoints and urls. search for http")
     return {"initial_context": "\n\n".join(d.page_content for d in docs)}
 
-def route_after_context_check(state: AgentState) -> Literal["perform_reasoning", "generate_all_answers"]:
+def route_after_context_check(state: AgentState) -> Literal["perform_reasoning", "generate_answers"]:
     """Conditional edge to decide between the ReAct agent and standard RAG."""
-    return "perform_reasoning" if contains_api_or_url(state.get("initial_context", "")) else "generate_all_answers"
+    return "perform_reasoning" if contains_api_or_url(state.get("initial_context", "")) else "generate_answers"
 
 def check_cache(state: AgentState) -> str:
     """Conditional edge to check if a cached FAISS index exists."""
@@ -98,7 +98,7 @@ def process_document(state: AgentState) -> AgentState:
     vs.save_local(state['cache_path'])
     return {"retriever": vs.as_retriever(search_type="mmr", search_kwargs={'k': 15})}
 
-async def generate_all_answers(state: AgentState) -> AgentState:
+async def generate_answers(state: AgentState) -> AgentState:
     """Node to generate answers for all questions in parallel."""
     if state.get('error_message'):
         return {"answers": ["Could not generate answers due to an earlier error."]}
@@ -133,7 +133,7 @@ workflow.add_node("load_from_cache", load_from_cache)
 workflow.add_node("check_for_api_context", check_for_api_context)
 workflow.add_node("perform_reasoning", perform_reasoning)
 workflow.add_node("process_document_flow", process_document)
-workflow.add_node("generate_all_answers", generate_all_answers)
+workflow.add_node("generate_answers", generate_answers)
 
 workflow.set_entry_point("initialize")
 workflow.add_edge("initialize", "check_cache_node")
@@ -141,14 +141,14 @@ workflow.add_edge("load_from_cache", "check_for_api_context")
 workflow.add_edge("process_document_flow", "check_for_api_context")
 workflow.add_conditional_edges("check_for_api_context", route_after_context_check, {
     "perform_reasoning": "perform_reasoning",
-    "generate_all_answers": "generate_all_answers"
+    "generate_answers": "generate_answers"
 })
 workflow.add_conditional_edges("check_cache_node", check_cache, {
     "load_from_cache": "load_from_cache",
     "process_document_flow": "process_document_flow"
 })
 workflow.add_edge("perform_reasoning", END)
-workflow.add_edge("generate_all_answers", END)
+workflow.add_edge("generate_answers", END)
 
 # Compiled graph, ready for use
 jarvis = workflow.compile()
