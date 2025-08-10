@@ -1,4 +1,4 @@
-Entity: An Intelligent Query & Reasoning System
+## Entity: An Intelligent Query & Reasoning System
 Entity is a sophisticated, AI-powered system designed to understand and answer complex questions about a wide range of documents. It goes beyond simple Q&A by dynamically choosing the best strategy for a given task—either performing a deep search within a document's content or acting as an autonomous agent to interact with external web APIs to find the answer.
 
 This project leverages the power of Large Language Models (LLMs), Retrieval-Augmented Generation (RAG), and agentic workflows orchestrated by LangGraph to deliver precise, context-aware answers.
