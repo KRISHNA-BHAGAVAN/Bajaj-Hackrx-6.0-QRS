@@ -1,195 +1,260 @@
-## Entity: An Intelligent Query & Reasoning System
-Entity is a sophisticated, AI-powered system designed to understand and answer complex questions about a wide range of documents. It goes beyond simple Q&A by dynamically choosing the best strategy for a given task—either performing a deep search within a document's content or acting as an autonomous agent to interact with external web APIs to find the answer.
+Here’s a **professional, open-source style** rewrite of your README section in Markdown.
+I kept all your details but made the structure cleaner, consistent, and visually appealing like a big GitHub project README.
 
-This project leverages the power of Large Language Models (LLMs), Retrieval-Augmented Generation (RAG), and agentic workflows orchestrated by LangGraph to deliver precise, context-aware answers.
+---
 
-✨ Key Features
-Multi-Format Document Parsing: Ingests and extracts text from various file types, including PDF, PPTX, XLSX, DOCX, and even images (JPG, PNG) using OCR.
+````markdown
+# Entity: Intelligent Query & Reasoning System
 
-Adaptive Reasoning Engine: Intelligently analyzes the document's content to decide whether to use a standard RAG pipeline for factual lookup or to deploy a ReAct (Reasoning and Acting) agent for tasks requiring external interaction.
+Entity is a **sophisticated AI-powered platform** that understands and answers complex questions from a variety of documents.  
+It goes far beyond simple Q&A by **dynamically selecting the optimal reasoning strategy**—either performing deep semantic search within document content or acting as an **autonomous agent** that can interact with external APIs and the web.
 
-Web-Aware Agent: The ReAct agent can autonomously use tools to scrape web pages and interact with APIs, following multi-step instructions found within a document to solve complex problems.
+Built with **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (RAG)**, and **agentic workflows powered by LangGraph**, Entity delivers **precise, context-aware answers** in real-time.
 
-Robust Caching: Features a two-tier caching system for both FAISS vector indexes and text embeddings, dramatically speeding up subsequent requests for the same document.
+---
 
-Pluggable Models: Easily switch between different LLMs (OpenAI, Groq, Gemini) and embedding providers (NVIDIA, HuggingFace) through simple configuration changes.
+## ✨ Key Features
 
-Scalable & Asynchronous: Built with FastAPI and asynchronous processing, ensuring the system is fast, efficient, and can handle concurrent requests.
+- **Multi-Format Document Parsing**  
+  Parse and extract text from PDFs, PPTX, XLSX, DOCX, and even images (`JPG`, `PNG`) via OCR.
 
-🏛️ Architecture
-Entity is built on a modular, stateful graph managed by LangGraph. This architecture allows for a clear and maintainable flow of logic, where each node in the graph represents a specific processing step. The system's core is a conditional router that directs the workflow based on the nature of the input document.
+- **Adaptive Reasoning Engine**  
+  Automatically chooses between:
+  - **Standard RAG Pipeline** for factual lookups.
+  - **ReAct Agent** for reasoning + external API/web interactions.
 
+- **Web-Aware Autonomous Agent**  
+  Executes tools to scrape pages, call APIs, and follow multi-step instructions embedded in documents.
+
+- **Two-Tier Caching System**  
+  Speeds up repeated queries with **FAISS vector index caching** and **embedding caching**.
+
+- **Pluggable Model Support**  
+  Swap between OpenAI, Groq, Gemini, NVIDIA, HuggingFace embeddings with simple config changes.
+
+- **Scalable & Async**  
+  Built with **FastAPI** + asynchronous processing for high concurrency and performance.
+
+---
+
+## 🏛 Architecture
+
+Entity is implemented as a **stateful LangGraph workflow**—each node represents a specific processing stage, with a conditional router deciding the path based on document type and query intent.
+
+```mermaid
 graph TD
-    A[API Request: URL + Questions] --> B{FastAPI Server};
-    B --> C[LangGraph: Initialize State];
-    C --> D{Cache Check: FAISS Index Exists?};
-    D -- Yes --> F[Load Index from Cache];
-    D -- No --> E[Process Document];
-    E --> E1[1. Parse File: PDF, PPTX, OCR];
-    E1 --> E2[2. Chunk Text];
-    E2 --> E3[3. Embed Chunks];
-    E3 --> E4[4. Create & Cache FAISS Index];
-    E4 --> F;
-    F --> G[Load Retriever];
-    G --> H{Router: Analyze Content for API/URL Keywords};
-    H -- No API/URL Found --> I[Standard RAG Pipeline];
-    I --> I1[Retrieve Relevant Chunks];
-    I1 --> I2[Generate Answer with LLM];
-    I2 --> Z[Final Answer];
-    H -- API/URL Found --> J[ReAct Agent Pipeline];
-    J --> J1[Agent Executes Tools];
-    J1 --> J2(Scrape Web / Call API);
-    J2 --> J3[Reasoning Loop];
-    J3 --> J1;
-    J3 --> Z;
-    Z --> B;
+    A[API Request: URL + Questions] --> B{FastAPI Server}
+    B --> C[LangGraph: Initialize State]
+    C --> D{Cache Check: FAISS Index Exists?}
+    D -- Yes --> F[Load Index from Cache]
+    D -- No --> E[Process Document]
+    E --> E1[Parse File: PDF, PPTX, OCR]
+    E1 --> E2[Chunk Text]
+    E2 --> E3[Embed Chunks]
+    E3 --> E4[Create & Cache FAISS Index]
+    E4 --> F
+    F --> G[Load Retriever]
+    G --> H{Router: API/URL Found?}
+    H -- No --> I[Standard RAG Pipeline]
+    I --> I1[Retrieve Relevant Chunks]
+    I1 --> I2[Generate Answer]
+    I2 --> Z[Final Answer]
+    H -- Yes --> J[ReAct Agent Pipeline]
+    J --> J1[Execute Tools]
+    J1 --> J2[Scrape Web / Call API]
+    J2 --> J3[Reasoning Loop]
+    J3 --> J1
+    J3 --> Z
+    Z --> B
+````
 
-🚀 Getting Started
-You can get the Entity server running in just a few steps. We recommend using Docker for the simplest and most reliable setup.
+---
 
-Prerequisites
-Git
+## 🚀 Getting Started
 
-Docker and Docker Compose
+We recommend running Entity with **Docker** for the easiest and most consistent setup.
 
-An NVIDIA API Key and/or an OpenAI API Key
+### **Prerequisites**
 
-Method 1: Docker (Recommended)
-Clone the repository:
+* Git
+* Docker & Docker Compose
+* API keys (NVIDIA and/or OpenAI)
 
-git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
-cd your-repository-name
+---
 
-Configure Environment Variables:
-Create a .env file by copying the example file.
+### **Method 1 — Docker (Recommended)**
 
-cp .env.example .env
+1. **Clone the Repository**
 
-Now, open the .env file and add your API keys and authentication token.
+   ```bash
+   git clone https://github.com/your-username/your-repository-name.git
+   cd your-repository-name
+   ```
 
-# Default and Recommended
-OPENAI_API_KEY=your-openai-api-key
+2. **Set Up Environment Variables**
 
-# Default and Recommended embeddings through nvidia api
-NVIDIA_API_KEY=your-nvidia-api-key
+   ```bash
+   cp .env.example .env
+   ```
 
-# Hackrx Team Authentication Token
-AUTH_TOKEN=08fc8c10d11b09149c14f524da59050937f9875fbfa7190cebe26992162cd61b
+   Edit `.env` and add your API keys:
 
-# Optional: Add other keys like GROQ or GEMINI if you plan to use them
+   ```dotenv
+   OPENAI_API_KEY=your-openai-api-key
+   NVIDIA_API_KEY=your-nvidia-api-key
+   AUTH_TOKEN=08fc8c10d11b09149c14f524da59050937f9875fbfa7190cebe26992162cd61b
+   ```
 
-Build and Run the Docker Container:
-This command builds the Docker image and starts the container. The -v flags create persistent volumes for the cache, so you don't lose your indexed data when the container stops.
+3. **Build & Run**
 
-docker build -t entity .
+   ```bash
+   docker build -t entity .
+   docker run \
+     --rm \
+     -p 8000:8000 \
+     --env-file ./.env \
+     -v faiss-cache-data:/app/faiss_cache \
+     -v embed-cache-data:/app/embed_cache \
+     entity
+   ```
 
-docker run \
-  --rm \
-  -p 8000:8000 \
-  --env-file ./.env \
-  -v faiss-cache-data:/app/faiss_cache \
-  -v embed-cache-data:/app/embed_cache \
-  entity
+   Entity will be available at:
+   **[http://localhost:8000](http://localhost:8000)**
 
-Ready! The API is now running and accessible at http://localhost:8000.
+---
 
-Method 2: Local Python Environment
-Clone the repository and navigate into the directory.
+### **Method 2 — Local Python Environment**
 
-Install System Dependencies:
-This project requires Tesseract for OCR. On Debian/Ubuntu, you can install it with:
+1. **Clone & Enter Directory**
 
-sudo apt-get update
-sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+   ```bash
+   git clone https://github.com/your-username/your-repository-name.git
+   cd your-repository-name
+   ```
 
-Create a Python Virtual Environment:
+2. **Install OCR Dependency**
 
-python3 -m venv venv
-source venv/bin/activate
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+   ```
 
-Install Python Packages:
+3. **Create Virtual Environment**
 
-pip install -r requirements.txt
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
 
-Configure Environment Variables as described in Step 2 of the Docker method.
+4. **Install Python Packages**
 
-Run the application:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-uvicorn main:app --host 0.0.0.0 --port 8000
+5. **Run Application**
 
-⚙️ Configuration
-API Keys & Tokens (.env): All secrets and keys are managed in the .env file.
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
 
-LLM and Embedding Models (config.py): You can easily swap out the models used for the RAG pipeline and the ReAct agent by commenting/uncommenting the relevant sections in config.py. This allows for great flexibility in balancing cost, speed, and capability.
+---
 
-🔌 API Usage
-You can interact with the API using any HTTP client. Here is an example using curl.
+## ⚙️ Configuration
 
-Endpoint: POST /api/v1/hackrx/run
+* **API Keys** → `.env` file
+* **LLM & Embedding Models** → `config.py`
+  Swap models by commenting/uncommenting in the config.
 
-Headers:
+---
 
+## 🔌 API Usage
+
+**Endpoint:**
+`POST /api/v1/hackrx/run`
+
+**Headers:**
+
+```http
 Authorization: Bearer your-auth-token
-
 Content-Type: application/json
+```
 
-Request Body:
+**Example Request:**
 
-{
-  "documents": "URL_TO_YOUR_DOCUMENT_HERE",
-  "questions": [
-    "What is the primary conclusion of this document?",
-    "Summarize the key financial figures for Q4."
-  ]
-}
-
-Example curl command:
-
+```bash
 curl -X POST http://localhost:8000/api/v1/hackrx/run \
 -H "Authorization: Bearer 08fc8c10d11b09149c14f524da59050937f9875fbfa7190cebe26992162cd61b" \
 -H "Content-Type: application/json" \
 -d '{
-  "documents": "[https://hackrx.blob.core.windows.net/assets/Test%20/Test%20Case%20HackRx.pptx?sv=2023-01-03&spr=https&st=2025-08-04T18%3A36%3A56Z&se=2026-08-05T18%3A36%3A00Z&sr=b&sp=r&sig=v3zSJ%2FKW4RhXaNNVTU9KQbX%2Bmo5dDEIzwaBzXCOicJM%3D](https://hackrx.blob.core.windows.net/assets/Test%20/Test%20Case%20HackRx.pptx?sv=2023-01-03&spr=https&st=2025-08-04T18%3A36%3A56Z&se=2026-08-05T18%3A36%3A00Z&sr=b&sp=r&sig=v3zSJ%2FKW4RhXaNNVTU9KQbX%2Bmo5dDEIzwaBzXCOicJM%3D)",
-  "questions": ["what is the name of the company?"]
+  "documents": "https://example.com/document.pdf",
+  "questions": ["What is the company name?"]
 }'
+```
 
-Successful Response (200 OK):
+**Example Response:**
 
+```json
 {
   "answers": [
     "The name of the company is 'Innovate Inc.'."
   ]
 }
+```
 
-📂 Project Structure
+---
+
+## 📂 Project Structure
+
+```
 .
-├── faiss_cache/        # Stores cached FAISS indexes
-├── embed_cache/        # Stores cached text embeddings
-├── config.py           # Central configuration for models and constants
-├── data_processing.py  # Handles document downloading, parsing, chunking, and embedding
-├── document_parser.py  # Specific parsers for PPTX, XLSX, and images
-├── graph_builder.py    # Defines the LangGraph state machine and workflow
-├── llm_services.py     # Manages the RAG chain and LLM fallback logic
-├── main.py             # FastAPI application entry point
-├── models.py           # Pydantic models for API requests and responses
-├── react_agent.py      # Implements the ReAct agent and its tools
-├── utils.py            # Utility functions, including token verification
-├── Dockerfile          # Instructions to build the Docker image
-├── requirements.txt    # Python package dependencies
-└── README.md           # This file
+├── faiss_cache/         # Cached FAISS indexes
+├── embed_cache/         # Cached embeddings
+├── config.py            # Config for models & constants
+├── data_processing.py   # Document download, parsing, embedding
+├── document_parser.py   # File-type specific parsers
+├── graph_builder.py     # LangGraph workflow definition
+├── llm_services.py      # RAG chain & LLM fallback logic
+├── main.py              # FastAPI entry point
+├── models.py            # Pydantic request/response models
+├── react_agent.py       # ReAct agent implementation
+├── utils.py             # Utility functions
+├── Dockerfile           # Docker build instructions
+├── requirements.txt     # Python dependencies
+└── README.md            # This file
+```
 
-🤝 Contributing
-Contributions are welcome! If you'd like to help improve Entity, please feel free to fork the repository, make your changes, and submit a pull request.
+---
 
-Fork the repository.
+## 🤝 Contributing
 
-Create a new branch (git checkout -b feature/your-feature-name).
+1. Fork the repository
+2. Create your branch:
 
-Make your changes and commit them (git commit -m 'Add some amazing feature').
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. Commit your changes:
 
-Push to the branch (git push origin feature/your-feature-name).
+   ```bash
+   git commit -m "Add amazing feature"
+   ```
+4. Push to branch:
 
-Open a Pull Request.
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+5. Open a Pull Request
 
-📜 License
-This project is licensed under the MIT License. See the LICENSE file for details.
+---
+
+## 📜 License
+
+Licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+```
+
+---
+
+If you want, I can also make you a **GitHub-flavored version with badges** (build status, Python version, license, Docker pulls) so it looks like a polished top-tier open-source project. That would make your hackathon project feel *production-grade*.
+```
