@@ -122,8 +122,8 @@ We recommend running Entity with **Docker** for the easiest and most consistent 
 1. **Clone & Enter Directory**
 
    ```bash
-   git clone https://github.com/your-username/your-repository-name.git
-   cd your-repository-name
+   git clone https://github.com/KRISHNA-BHAGAVAN/Bajaj-Hackrx-6.0-Entity.git
+   cd Bajaj-Hackrx-6.0-Entity
    ```
 
 2. **Install OCR Dependency**
