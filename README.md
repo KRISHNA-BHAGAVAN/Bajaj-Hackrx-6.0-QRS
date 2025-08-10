@@ -227,5 +227,3 @@ curl -X POST http://localhost:8000/api/v1/hackrx/run \
 ## 📜 License
 
 Licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
-```
