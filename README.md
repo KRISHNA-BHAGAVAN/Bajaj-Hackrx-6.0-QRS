@@ -35,9 +35,9 @@ Built with **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (R
 
 Entity is implemented as a **stateful LangGraph workflow**—each node represents a specific processing stage, with a conditional router deciding the path based on document type and query intent.
 
-
-![Entity Architecture](workflow.png)
-
+<p align="center">
+  <img src="workflow.png" alt="Entity Architecture" width="700"/>
+</p>
 
 ---
 
