@@ -229,8 +229,3 @@ curl -X POST http://localhost:8000/api/v1/hackrx/run \
 Licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ```
-
----
-
-If you want, I can also make you a **GitHub-flavored version with badges** (build status, Python version, license, Docker pulls) so it looks like a polished top-tier open-source project. That would make your hackathon project feel *production-grade*.
-```
