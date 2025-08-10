@@ -35,7 +35,7 @@ Built with **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (R
 
 Entity is implemented as a **stateful LangGraph workflow**—each node represents a specific processing stage, with a conditional router deciding the path based on document type and query intent.
 
-```mermaid
+```
 graph TD
     A[API Request: URL + Questions] --> B{FastAPI Server}
     B --> C[LangGraph: Initialize State]
@@ -60,7 +60,7 @@ graph TD
     J3 --> J1
     J3 --> Z
     Z --> B
-
+```
 
 ---
 
