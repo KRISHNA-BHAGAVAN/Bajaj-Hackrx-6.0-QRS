@@ -76,13 +76,13 @@ We recommend running Entity with **Docker** for the easiest and most consistent 
    AUTH_TOKEN=08fc8c10d11b09149c14f524da59050937f9875fbfa7190cebe26992162cd61b
    ```
 
-3. **Build & Run**
-   Build the Image
+3. **Build & Run the Image**
 
    ```bash
    docker build -t entity .
    ```
-   Run the Container
+   
+4. **Run the Container**
    
    ```bash
    docker run \
