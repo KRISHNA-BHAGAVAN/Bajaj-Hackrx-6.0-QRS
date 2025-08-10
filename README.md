@@ -1,9 +1,3 @@
-Here’s a **professional, open-source style** rewrite of your README section in Markdown.
-I kept all your details but made the structure cleaner, consistent, and visually appealing like a big GitHub project README.
-
----
-
-````markdown
 # Entity: Intelligent Query & Reasoning System
 
 Entity is a **sophisticated AI-powered platform** that understands and answers complex questions from a variety of documents.  
@@ -66,7 +60,7 @@ graph TD
     J3 --> J1
     J3 --> Z
     Z --> B
-````
+
 
 ---
 
