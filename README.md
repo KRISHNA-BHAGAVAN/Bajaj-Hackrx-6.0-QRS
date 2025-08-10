@@ -77,9 +77,14 @@ We recommend running Entity with **Docker** for the easiest and most consistent 
    ```
 
 3. **Build & Run**
+   Build the Image
 
    ```bash
    docker build -t entity .
+   ```
+   Run the Container
+   
+   ```bash
    docker run \
      --rm \
      -p 8000:8000 \
