@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv/
+
+# Sensitive files
+.env
+
+# IDE and OS files
+.idea/
+.vscode/
+*.swp
